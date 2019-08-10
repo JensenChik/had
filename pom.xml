@@ -75,6 +75,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- calcite-->
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-core</artifactId>
+            <version>1.18.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
