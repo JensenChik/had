@@ -1,0 +1,129 @@
+@startuml
+package "enums"{
+    enum WhichRow{
+        INPUT_OUTER
+        INPUT_INNER
+        OUTPUT
+        GROUPBY
+    }
+    enum SQLOps {
+        EQ
+        BW_EQ
+        NE
+        LT
+        GT
+        LE
+        GE
+        AND
+        OR
+        NOT
+        MINUS
+        PLUS
+        MULTIPLY
+        DIVIDE
+        MODULO
+        UMINUS
+        IS_NULL
+        IS_NOT_NULL
+        EXISTS
+        CAST
+        ARRAY_AT
+        UNNEST
+        FUNCTION
+        IN
+        OVERLAPS
+    }
+    enum SQLQualifier {
+        ONE
+        ANY
+        ALL
+    }
+
+    enum SQLAgg {
+        AVG
+        MIN
+        MAX
+        SUM
+        COUNT
+        APPROX_COUNT_DISTINCT
+        SAMPLE
+    }
+
+
+    enum ExtractField {
+        YEAR
+        QUARTER
+        MONTH
+        DAY
+        HOUR
+        MINUTE
+        SECOND
+        MILLI_SECOND
+        MICRO_SECOND
+        NANO_SECOND
+        DOW
+        ISO_DOW
+        DOY
+        EPOCH
+        QUARTER_DAY
+        WEEK
+    }
+
+    enum DateAddField {
+        YEAR
+        QUARTER
+        MONTH
+        DAY
+        HOUR
+        MINUTE
+        SECOND
+        MILLENNIUM
+        CENTURY
+        DECADE
+        MILLI_SECOND
+        MICRO_SECOND
+        NANO_SECOND
+        WEEK
+        QUARTER_DAY
+        WEEKDAY
+        DAY_OF_YEAR
+        INVALID
+    }
+    enum DateTruncField {
+        YEAR
+        QUARTER
+        MONTH
+        DAY
+        HOUR
+        MINUTE
+        SECOND
+        MILLENNIUM
+        CENTURY
+        DECADE
+        MILLI_SECOND
+        MICRO_SECOND
+        NANO_SECOND
+        WEEK
+        QUARTER_DAY
+        INVALID
+    }
+    enum SqlWindowFunctionType {
+        ROW_NUMBER
+        RANK
+        DENSE_RANK
+        PERCENT_RANK
+        CUME_DIST
+        NTILE
+        LAG
+        LEAD
+        FIRST_VALUE
+        LAST_VALUE
+        AVG
+        MIN
+        MAX
+        SUM
+        COUNT
+        SUM_INTERNAL
+    }
+}
+@enduml
