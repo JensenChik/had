@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.cuda.shared
+package tech.cuda.enums
 
 
-enum class SQLOps {
+enum class OperatorType {
     EQ,
     BW_EQ,
     NE,
