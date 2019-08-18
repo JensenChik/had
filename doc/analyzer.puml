@@ -90,7 +90,6 @@ package "analyzer"{
         rewrite_agg_to_var()
     }
     ColumnVar <|-- Var
-    WhichRow *-- Var
 
 
     class Constant{
@@ -137,7 +136,6 @@ package "analyzer"{
         add_cast()
     }
     Expr <|-- UOper
-    SQLOps *-- UOper
 
     class BinOper{
         -optype: SQLOps
@@ -168,8 +166,6 @@ package "analyzer"{
         simple_predicate_has_simple_cast()
     }
     Expr <|-- BinOper
-    SQLOps *-- BinOper
-    SQLQualifier *-- BinOper
 
     class Subquery{
         -parsetree:Query
