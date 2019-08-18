@@ -15,7 +15,6 @@ package tech.cuda.shared
 
 import tech.cuda.enums.CompressionType
 import tech.cuda.enums.ColumnType
-import tech.cuda.enums.canBeCastTo
 
 enum class PackagingType { CHUNK, STANDARD_BUFFER }
 

@@ -13,7 +13,7 @@
  */
 package tech.cuda.enums
 
-enum class DataType {
+enum class ColumnType {
     NULL,
     BOOLEAN,
     CHAR,
@@ -59,15 +59,16 @@ enum class DataType {
                 SMALLINT, BIGINT, TINYINT, INT,
                 NUMERIC, DECIMAL, FLOAT, DOUBLE
         )
+    infix fun canBeCastTo(another: ColumnType) = when {
+        this == another -> true
+        this.isString or another.isString -> true
+        this.isNumber and another.isNumber -> true
+        this.isTime and another.isNumber -> true
+        this.isNumber and another.isTime -> true
+        this.isBoolean and another.isNumber -> true
+        this.isNumber and another.isBoolean -> true
+        else -> false
+    }
 }
 
-infix fun DataType.canBeCastTo(another: DataType) = when {
-    this == another -> true
-    this.isString or another.isString -> true
-    this.isNumber and another.isNumber -> true
-    this.isTime and another.isNumber -> true
-    this.isNumber and another.isTime -> true
-    this.isBoolean and another.isNumber -> true
-    this.isNumber and another.isBoolean -> true
-    else -> false
-}
+
