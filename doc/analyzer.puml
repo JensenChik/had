@@ -1,0 +1,620 @@
+@startuml
+
+!include enums.puml
+!include shared.puml
+!include catalog.puml
+
+
+
+
+package "analyzer"{
+    abstract class Expr{
+        #type_info : SQLTypeInfo
+        #contains_agg : Boolean
+
+        get_type_info()
+        set_type_info()
+        get_contains_agg()
+        set_contains_agg()
+        add_cast()
+        check_group_by()
+        deep_copy()
+        normalize_simple_predicate()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        print()
+        add_unique()
+        decompress()
+        get_domain()
+        find_expr()
+    }
+    SQLTypeInfo *--  Expr
+
+    class ColumnVar{
+        # table_id : Int
+        # column_id : Int
+        # rte_idx : Int
+
+        get_table_id()
+        get_column_id()
+        get_rte_idx()
+        get_compression()
+        get_comp_param()
+        check_group_by()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        colvar_comp()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+    }
+    Expr <|-- ColumnVar
+
+
+
+    class ExpressionTuple{
+        - tuple:List<Expr>
+        getTuple()
+        collect_rte_idx()
+        deep_copy()
+        equals()
+        toString()
+    }
+    Expr <|-- ExpressionTuple
+
+
+    class Var{
+        - varNo:Int
+        - which_row: WhichRow
+
+        get_which_row()
+        set_which_row()
+        get_varNo()
+        set_varNo()
+        deep_copy()
+        toString()
+        check_group_by()
+        collect_rte_idx()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+    }
+    ColumnVar <|-- Var
+    WhichRow *-- Var
+
+
+    class Constant{
+        -is_null : Boolean
+        -constval: Datum
+
+        -value_list : List<Expr>
+        -cast_number()
+        -cast_string()
+        -cast_from_string()
+        -cast_to_string()
+        -do_cast()
+        -set_null_value()
+        get_is_null()
+        get_constval()
+        set_constval()
+        get_value_list()
+        deep_copy()
+        add_cast()
+        equals()
+        toString()
+    }
+    Expr <|-- Constant
+    Datum *-- Constant
+
+
+    class UOper{
+        -optype: SQLOps
+        -operand: Expr
+
+        get_optype()
+        get_operand()
+        check_group_by()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+        add_cast()
+    }
+    Expr <|-- UOper
+    SQLOps *-- UOper
+
+    class BinOper{
+        -optype: SQLOps
+        -qualifier: SQLQualifier
+        -left_operand: Expr
+        -right_operand: Expr
+
+        get_optype()
+        is_overlaps_oper()
+        get_qualifier()
+        get_left_operand()
+        get_right_operand()
+        analyze_type_info()
+        common_numeric_type()
+        common_string_type()
+        check_group_by()
+        deep_copy()
+        normalize_simple_predicate()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+        simple_predicate_has_simple_cast()
+    }
+    Expr <|-- BinOper
+    SQLOps *-- BinOper
+    SQLQualifier *-- BinOper
+
+    class Subquery{
+        -parsetree:Query
+        get_parsetree()
+        add_cast()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- Subquery
+    Query *-- Subquery
+
+    class InValues{
+        -arg:Expr
+        -value_list:List<Expr>
+
+        get_arg()
+        get_value_list()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- InValues
+
+    class InIntegerSet{
+        -arg:Expr
+        -value_list:List<Int>
+        get_arg()
+        get_value_list()
+        deep_copy()
+        equals()
+        toString()
+    }
+    Expr <|-- InIntegerSet
+
+
+    class CharLengthExpr{
+        -arg:Expr
+        -calc_encoded_length:Boolean
+        get_arg()
+        get_calc_encoded_length()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- CharLengthExpr
+
+    class KeyForStringExpr{
+        -arg:Expr
+        get_arg()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- KeyForStringExpr
+
+    class CardinalityExpr{
+        -arg:Expr
+        get_arg()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- CardinalityExpr
+
+    class LikeExpr{
+        -is_iLike: Boolean
+        -is_simple: Boolean
+        -arg:Expr
+        -like_expr:Expr
+        -escape_expr:Expr
+        get_arg()
+        get_like_expr()
+        get_escape_expr()
+        get_is_is_iLike()
+        get_is_simple()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- LikeExpr
+
+
+    class RegexpExpr{
+        -arg:Expr
+        -pattern_expr:Expr
+        -escape_expr:Expr
+        get_arg()
+        get_pattern_expr()
+        get_escape_expr()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- RegexpExpr
+
+    class LikelihoodExpr{
+        -arg:Expr
+        -likelihood:Float
+        get_arg()
+        get_likelihood()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- LikelihoodExpr
+
+    class AggExpr{
+        -agg_type:SQLAgg
+        -arg:Expr
+        -is_distinct:Boolean
+        error_rate: Constant
+
+        get_agg_type()
+        get_arg()
+        get_is_distinct()
+        get_error_rate()
+        deep_copy()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- AggExpr
+
+
+
+    class CaseExpr{
+        -expr_pair_list:List<Pair<Expr, Expr>>
+        -else_expr:Expr
+
+        get_expr_pair_list()
+        get_else_expr()
+        deep_copy()
+        check_group_by()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+        add_cast()
+        get_domain()
+    }
+    Expr <|-- CaseExpr
+
+    class ExtractExpr{
+        -field: ExtractField
+        -from_expr: Expr
+        get_field()
+        get_from_expr()
+        deep_copy()
+        check_group_by()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- ExtractExpr
+
+    class DateaddExpr{
+        -field:DateAddField
+        -number:Expr
+        -datetime:Expr
+        get_field()
+        get_number_expr()
+        get_datetime_expr()
+        deep_copy()
+        check_group_by()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- DateaddExpr
+
+    class DatediffExpr{
+        -field:DateTruncField
+        -start:Expr
+        -end:Expr
+
+        get_field()
+        get_start_expr()
+        get_end_expr()
+        deep_copy()
+        check_group_by()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- DatediffExpr
+
+
+    class DatetruncExpr{
+        -field:DateTruncField
+        -from_expr:Expr
+        get_field()
+        get_from_expr()
+        deep_copy()
+        check_group_by()
+        group_predicates()
+        collect_rte_idx()
+        collect_column_var()
+        rewrite_with_targetlist()
+        rewrite_with_child_targetlist()
+        rewrite_agg_to_var()
+        equals()
+        toString()
+        find_expr()
+    }
+    Expr <|-- DatetruncExpr
+
+
+    class FunctionOper{
+        -name:String
+        -args:List<Expr>
+        get_name()
+        getArity()
+        get_arg()
+        deep_copy()
+        equals()
+        toString()
+    }
+    Expr <|--  FunctionOper
+
+
+    class FunctionOperWithCustomTypeHandling{
+        deep_copy()
+        equals()
+    }
+    FunctionOper <|-- FunctionOperWithCustomTypeHandling
+
+    class OffsetInFragment{
+        deep_copy()
+        equals()
+        toString()
+    }
+    Expr <|-- OffsetInFragment
+
+    class OrderEntry{
+        -targetListEntryNum:Int
+        -isDesc:Boolean
+        -NullFirst:Boolean
+        toString()
+        print()
+    }
+
+    class WindowFunction{
+        -kind:SqlWindowFunctionType
+        -args:List<Expr>
+        -partitionKey:List<Expr>
+        -orderKey:List<Expr>
+        -collation:List<OrderEntry>
+        getKind()
+        get_args()
+        get_partitionKey()
+        get_orderKey()
+        get_collation()
+        deep_copy()
+        equals()
+        toString()
+
+    }
+    Expr <|--  WindowFunction
+    OrderEntry *-- WindowFunction
+
+    class ArrayExpr{
+        -tweaked_type_info:SQLTypeInfo
+        -contained_expressions:List<Expr>
+        -expr_index: Int
+        -local_alloc: Boolean
+
+        - preInitTweakedTypeInfo()
+
+        getElement()
+        getElementCount()
+        get_expr_index()
+        get_is_local_alloc()
+        deep_copy()
+        toString()
+        equals()
+
+    }
+    Expr <|-- ArrayExpr
+
+    class TargetEntry{
+        -res_name String
+        -expr:Expr
+        -unnest:Boolean
+
+        get_res_name()
+        set_res_name()
+        get_expr()
+        set_expr()
+        get_unnest()
+        toString()
+        print()
+    }
+
+    class RangeTableEntry{
+        -rangeVar:String
+        -table_desc: TableDescriptor
+        -column_desc:ColumnDescriptor
+        -view_query:Query
+    }
+
+    ColumnDescriptor *-- RangeTableEntry
+    TableDescriptor *-- RangeTableEntry
+
+    class Query{
+        -is_distinct:Boolean
+        -target_list:List<TargetEntry>
+        -range_table:List<RangeTableEntry>
+        -where_predicate:Expr
+        -group_by:List<Expr>
+        -having_predicate:Expr
+        -order_by:List<OrderEntry>
+        -next_query:Query
+        -is_union_all:Boolean
+        -stmt_type:SQLStmtType
+        -num_agg:Int
+        -result_table_id:Int
+        -result_col_list:List<Int>
+        -limit:Int
+        -offset:Int
+
+        get_is_distinct()
+        set_is_distinct()
+        get_num_agg()
+        set_num_agg()
+        get_target_list()
+        get_range_table()
+        get_where_predicate()
+        set_where_predicate()
+        get_group_by()
+        set_group_by()
+        get_having_predicate()
+        set_having_predicate()
+        get_order_by()
+        set_order_by()
+        get_next_query()
+        set_next_query()
+        get_stmt_type()
+        set_stmt_type()
+        get_is_unionall()
+        set_is_unionall()
+        get_result_table_id()
+        set_result_table_id()
+        get_result_col_list()
+        set_result_col_list()
+        get_rte_idx()
+        get_rte()
+        add_rte()
+        add tle()
+        get_limit()
+        set_limit()
+        get_offset()
+        set_offset()
+    }
+
+    TargetEntry *--  Query
+    RangeTableEntry *--  Query
+    OrderEntry *--  Query
+
+}
+
+
+@enduml
