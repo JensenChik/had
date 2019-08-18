@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.cuda.shared
+package tech.cuda.enums
 
 enum class CompressionType {
     NULL,          // no encoding
