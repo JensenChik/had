@@ -84,7 +84,7 @@ abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = fals
      * [targetList] expressions are expected to be only Var's or AggExpr's.
      * returns a new expression copy
      */
-    open fun rewriteWithTargetList(targetList: List<TargetEntry>): Expression {
+    open fun rewriteWithTargetList(targetList: MutableList<TargetEntry>): Expression {
         return deepCopy()
     }
 
@@ -93,7 +93,7 @@ abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = fals
      * [targetList] expressions are expected to be only Var's or * ColumnVar's
      * returns a new expression copy
      */
-    open fun rewriteWithChildTargetList(targetList: List<TargetEntry>): Expression {
+    open fun rewriteWithChildTargetList(targetList: MutableList<TargetEntry>): Expression {
         return deepCopy()
     }
 
@@ -103,7 +103,7 @@ abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = fals
      * All AggExpr's are written into Var's.
      * returns a new expression copy
      */
-    open fun rewriteAggToVar(targetList: List<TargetEntry>): Expression {
+    open fun rewriteAggToVar(targetList: MutableList<TargetEntry>): Expression {
         return deepCopy()
     }
 
