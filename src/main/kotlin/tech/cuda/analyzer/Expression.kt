@@ -14,57 +14,59 @@
 package tech.cuda.analyzer
 
 import tech.cuda.exception.CastException
-import tech.cuda.shared.CompressionType
-import tech.cuda.shared.DataType
-import tech.cuda.shared.SQLOps
-import tech.cuda.shared.SQLTypeInfo
+import tech.cuda.enums.CompressionType
+import tech.cuda.enums.ColumnType
+import tech.cuda.enums.SQLOps
+import tech.cuda.shared.ColumnInfo
 import java.util.*
 
 /**
  * super class for all expressions in parse trees and in query plans
  */
-abstract class Expression(val typeInfo: SQLTypeInfo, val hasAgg: Boolean = false) {
+abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = false) {
 
-    constructor(type: DataType, dimension: Int = 0, scale: Int = 0)
-            : this(SQLTypeInfo(type, dimension = dimension, scale = scale))
+    constructor(type: ColumnType, dimension: Int = 0, scale: Int = 0)
+            : this(ColumnInfo(type, dimension = dimension, scale = scale))
 
-    open fun addCast(another: SQLTypeInfo): Expression {
-        if (typeInfo == another) {
+    open fun addCast(anotherColumnInfo: ColumnInfo): Expression {
+        if (this.columnInfo == anotherColumnInfo) {
             return this
         }
-        if (another.type.isString
-                && typeInfo.type.isString
-                && another.compression == CompressionType.DICT
-                && typeInfo.compression == CompressionType.DICT
-                && another.compParam == typeInfo.compParam
+        if (this.columnInfo.type.isString && anotherColumnInfo.type.isString
+                && this.columnInfo.compression == CompressionType.DICT
+                && anotherColumnInfo.compression == CompressionType.DICT
+                && this.columnInfo.compParam == anotherColumnInfo.compParam
         ) {
             return this
         }
-        if (!(typeInfo canBeCastTo another)) {
-            throw CastException(typeInfo.typeName, another.typeName)
+        if (!(this.columnInfo canBeCastTo anotherColumnInfo)) {
+            throw CastException(this.columnInfo.typeName, anotherColumnInfo.typeName)
         }
-        return UnaryOperator(another, this.hasAgg, SQLOps.CAST, this)
+        return UnaryOperator(anotherColumnInfo, this.hasAgg, SQLOps.CAST, this)
     }
 
-    abstract fun checkGroupBy(groupBy: List<Expression>)
+    open fun checkGroupBy(groupBy: List<Expression>) {
+    }
 
-    abstract fun deepCopy(): Expression
 
     /**
      * separate conjunctive predicates into [scanPredicates],
      * [joinPredicates] and [constPredicates].
      */
-    abstract fun groupPredicates(
+    open fun groupPredicates(
             scanPredicates: MutableList<Expression>,
             joinPredicates: MutableList<Expression>,
             constPredicates: MutableList<Expression>
-    )
+    ) {
+    }
 
     /**
      * collects the indices of all the range table
      * entries involved in an expression
      */
-    abstract fun collectRangeTableEntriesIndexTo(rteSet: MutableSet<Int>)
+    open fun collectRangeTableEntriesIndexTo(rteSet: MutableSet<Int>) {
+
+    }
 
 
     /**
@@ -73,7 +75,9 @@ abstract class Expression(val typeInfo: SQLTypeInfo, val hasAgg: Boolean = false
      * the argument to AggExpr's.  Otherwise, they are included.
      * It does not make copies of the ColumnVar
      */
-    abstract fun collectColumnVar(colVarSet: TreeSet<ColumnVar>, hasAgg: Boolean)
+    open fun collectColumnVar(colVarSet: TreeSet<ColumnVar>, hasAgg: Boolean) {
+
+    }
 
     /**
      * rewrite ColumnVar's in expression with entries in a [targetList].
@@ -103,7 +107,16 @@ abstract class Expression(val typeInfo: SQLTypeInfo, val hasAgg: Boolean = false
         return deepCopy()
     }
 
-    abstract fun addUnique(exprList: ExpressionList)
+    /**
+     * add self to [exprList] if self not exists in [exprList]
+     */
+    open fun addUnique(exprList: ExpressionList) {
+        if (exprList.contains(this)) {
+            return
+        } else {
+            exprList.add(this)
+        }
+    }
 
     /**
      * traverse Expr hierarchy and adds the node pointer to
@@ -117,10 +130,34 @@ abstract class Expression(val typeInfo: SQLTypeInfo, val hasAgg: Boolean = false
     }
 
     /**
+     * decompress adds cast operator to decompress encoded result
+     */
+    open fun decompress(): Expression {
+        if (this.columnInfo.compression == CompressionType.NULL) {
+            return this
+        }
+        return UnaryOperator(
+                ColumnInfo(
+                        type = this.columnInfo.type,
+                        subType = this.columnInfo.subType,
+                        dimension = this.columnInfo.dimension,
+                        scale = this.columnInfo.scale
+                ),
+                this.hasAgg,
+                SQLOps.CAST,
+                this
+        )
+    }
+
+    /**
      * perform domain analysis on Expr and fill in domain information in [domainSet].
      * Empty [domainSet] means no information.
      */
     open fun getDomain(domainSet: DomainSet) {
+        domainSet.clear()
     }
+
+    abstract fun deepCopy(): Expression
+
 
 }
