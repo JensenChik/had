@@ -1,0 +1,47 @@
+
+@startuml
+package "catalog"{
+    class ColumnDescriptor{
+        table_id:Int
+        column_id:Int
+        Column_name:String
+        source_name:String
+        columnType:SQLTypeInfo
+        chunks:String
+        isSystemCol:Boolean
+        isVirtualCol:Boolean
+        virtualExpr:String
+        isDeletedCol:Boolean
+        isGeoPhyCol:Boolean
+    }
+
+    class TableDescriptor{
+        table_id:Int
+        shard: Int
+        tableName:String
+        userId:Int
+        nColumns:Int
+        isView:Boolean
+        viewSQL:String
+        fragments:String
+        fragType:FragmenterType
+        maxFragRows:Int
+        maxChunkSize:Int
+        fragPageSize:Int
+        maxRows:Int
+        partitions:String
+        keyMetaInfo:String
+        fragmenter:AbstractFragmenter
+        nShards:Int
+        shardedColumnId:Int
+        sortedColumnId:Int
+        persistenceLevel:MemoryLevel
+        hasDeletedCol:Boolean
+        columnIdBySpi:List<Int>
+        mutex:Mutex
+
+        table_is_replicated()
+        compare_td_id()
+    }
+}
+@enduml
