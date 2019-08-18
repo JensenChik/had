@@ -15,10 +15,15 @@ package tech.cuda.analyzer
 
 import tech.cuda.enums.ColumnType
 
-class InIntegerSet(
-        val arg: Expression,
-        val valueList: List<Long>
-) : Expression(ColumnType.BOOLEAN) {
+/**
+ * represents predicate expr IN (v1, v2, ...) for the case where the right
+ * hand side is a list of integers or dictionary-encoded strings generated
+ * by a IN subquery. Avoids the overhead of storing a list of shared pointers
+ * to Constant objects, making it more suitable for IN sub-queries usage.
+ * v1, v2, ... are integers
+ */
+class InIntegerSet(val arg: Expression, val valueList: List<Long>)
+    : Expression(ColumnType.BOOLEAN) {
 
     override fun deepCopy(): Expression {
         return InIntegerSet(arg, valueList)
