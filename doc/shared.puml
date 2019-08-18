@@ -1,0 +1,10 @@
+
+@startuml
+package "shared"{
+    class SQLTypeInfo{
+    }
+
+    class Datum{
+    }
+}
+@enduml
