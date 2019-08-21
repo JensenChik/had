@@ -16,7 +16,7 @@ package tech.cuda.analyzer
 import tech.cuda.exception.CastException
 import tech.cuda.enums.CompressionType
 import tech.cuda.enums.ColumnType
-import tech.cuda.enums.SQLOps
+import tech.cuda.enums.OperatorType
 import tech.cuda.shared.ColumnInfo
 import java.util.*
 
@@ -42,7 +42,7 @@ abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = fals
         if (!(this.columnInfo canBeCastTo anotherColumnInfo)) {
             throw CastException(this.columnInfo.typeName, anotherColumnInfo.typeName)
         }
-        return UnaryOperator(anotherColumnInfo, this.hasAgg, SQLOps.CAST, this)
+        return UnaryOperator(anotherColumnInfo, this.hasAgg, OperatorType.CAST, this)
     }
 
     open fun checkGroupBy(groupBy: List<Expression>) {
@@ -144,7 +144,7 @@ abstract class Expression(var columnInfo: ColumnInfo, var hasAgg: Boolean = fals
                         scale = this.columnInfo.scale
                 ),
                 this.hasAgg,
-                SQLOps.CAST,
+                OperatorType.CAST,
                 this
         )
     }
