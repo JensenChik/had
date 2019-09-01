@@ -28,7 +28,7 @@ class ColumnInfo(
         val dimension: Int = 0,
         val scale: Int = 0,
         val compression: CompressionType = CompressionType.NULL,
-        val compParam: Int = 0
+        var compParam: Int = 0
 ) {
 
     var packagingType: PackagingType = PackagingType.CHUNK
