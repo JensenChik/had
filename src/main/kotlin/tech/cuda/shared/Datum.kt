@@ -178,7 +178,7 @@ sealed class Datum(var value: Any?) {
     abstract fun <T : Datum> castTo(clazz: KClass<T>): Datum
 
 
-    infix fun formatString(columnInfo: ColumnInfo): String {
+    infix fun toStringWith(columnInfo: ColumnInfo): String {
         return if (columnInfo.type != ColumnType.TIME
                 && columnInfo.type != ColumnType.TIMESTAMP
                 && columnInfo.type != ColumnType.DATE
